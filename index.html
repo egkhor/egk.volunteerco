@@ -219,6 +219,10 @@
         <input type="text" id="need-title" placeholder="e.g. Food distribution at Batu Pahat" />
       </div>
       <div class="form-group">
+        <label>Contact Number <span style="color:#999;font-weight:400">(volunteers will see this)</span></label>
+        <input type="tel" id="need-contact" placeholder="+60 12-345 6789" />
+      </div>
+      <div class="form-group">
         <label>Description</label>
         <textarea id="need-desc" placeholder="Describe what help is needed..."></textarea>
       </div>
@@ -414,12 +418,14 @@ async function postNeed() {
   const meta = currentSession?.user?.user_metadata;
   const postedBy = meta?.name || currentSession?.user?.email || 'Coordinator';
 
+  const contact = document.getElementById('need-contact').value.trim();
   const { error } = await sb.from('volunteer_needs').insert({
     title, description: desc, location,
     required_skills: Array.from(selectedSkills),
     urgency_level: selectedUrgency,
     status: 'open',
-    posted_by: postedBy
+    posted_by: postedBy,
+    contact_number: contact || null
   });
 
   btn.disabled = false;
@@ -431,6 +437,7 @@ async function postNeed() {
   document.getElementById('need-title').value = '';
   document.getElementById('need-desc').value = '';
   document.getElementById('need-location').value = '';
+  document.getElementById('need-contact').value = '';
   selectedSkills.clear();
   document.querySelectorAll('.skill-chip').forEach(c => c.classList.remove('selected'));
   selectUrgency('low');
@@ -483,6 +490,15 @@ function renderNeeds() {
       ${need.required_skills?.length ? `
         <div class="need-skills">
           ${need.required_skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+        </div>` : ''}
+      ${need.contact_number ? `
+        <div style="margin-top:10px;padding:8px 12px;background:#E8F5E9;border-radius:8px;font-size:13px;display:flex;align-items:center;gap:8px;">
+          <span>📞</span>
+          <span style="color:#2E7D32;font-weight:600">${need.contact_number}</span>
+          <a href="https://wa.me/${need.contact_number.replace(/[^0-9]/g,'')}" target="_blank"
+             style="margin-left:auto;background:#25D366;color:white;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none;">
+            WhatsApp
+          </a>
         </div>` : ''}
       <div class="need-footer">
         <span class="response-count" id="resp-${need.id}">Loading responses...</span>
