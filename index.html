@@ -169,6 +169,10 @@
 <!-- ===================== AUTH ===================== -->
 <div id="auth-screen">
   <div class="auth-card">
+    <div id="cors-warning" style="background:#FFF3E0;color:#E65100;padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none;">
+      ⚠️ <strong>Open this file from a server</strong>, not directly from your file system.<br>
+      Drag this HTML file to <a href="https://netlify.com/drop" target="_blank" style="color:#E65100">netlify.com/drop</a> for instant free hosting.
+    </div>
     <div class="auth-logo">
       <div class="emoji">📋</div>
       <h1>EGK VolunterCo</h1>
@@ -354,7 +358,11 @@ async function handleAuth() {
 
   document.getElementById('auth-btn').textContent = isSignUp ? 'Create Account' : 'Sign In';
   if (result.error) { showError(result.error.message); return; }
-  if (isSignUp) showError('Check your email to confirm your account!', 'var(--green)');
+  if (isSignUp) {
+    showError('✅ Account created! Check your email inbox to confirm, then sign in here.', 'var(--green)');
+    toggleAuthMode(); // switch to sign-in mode automatically
+    return;
+  }
 }
 
 function showError(msg, color = 'var(--red)') {
@@ -521,6 +529,10 @@ function showToast(msg) {
   t.textContent = msg;
   t.style.display = 'block';
   setTimeout(() => t.style.display = 'none', 3500);
+}
+// Detect file:// protocol and show warning
+if (window.location.protocol === 'file:') {
+  document.getElementById('cors-warning').style.display = 'block';
 }
 </script>
 </body>
